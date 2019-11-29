@@ -61,9 +61,9 @@ export const selectConfigFile = (workspaceRoot: string) => (
   );
 
 export const applyEnvByNixConfPath = (
-  makeCmd: (path: string) => Option<string>
-) => (nixConfigPath: string) =>
-    of<Error, Option<string>>(makeCmd(nixConfigPath))
+  makeCmd: (path: string, attr: Option<string>) => Option<string>
+) => (nixConfigPath: string, nixAttr: Option<string> = none) =>
+    of<Error, Option<string>>(makeCmd(nixConfigPath, nixAttr))
       .map(
         mapNullable(cmd =>
           node<Error, string>(done => exec(cmd, done))
@@ -88,7 +88,7 @@ export const updateEditorConfig = (
         .then(_ => done(null, true), err => done(err))
     );
 
-export const activateOrShowDialog = (workspaceRoot: string) =>
+export const activateOrShowDialog = (workspaceRoot: string, nixAttr: Option<string>) =>
   fold<string, FutureInstance<Error, Option<boolean>>>(
     () => {
       return getNixConfigList(workspaceRoot)
@@ -118,8 +118,7 @@ export const activateOrShowDialog = (workspaceRoot: string) =>
       try {
         return of(
           pipe(
-            nixConfigPath,
-            getShellCmd("env"),
+            getShellCmd("env", nixAttr)(nixConfigPath),
             mapNullable(
               flow(
                 // HACK: sync operation using for block tread and prevent loading other
