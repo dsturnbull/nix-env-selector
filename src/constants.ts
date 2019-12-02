@@ -20,5 +20,7 @@ export const enum Command {
   RELOAD_WINDOW = "workbench.action.reloadWindow",
 }
 
-export const SELECTED_ENV_CONFIG_KEY = "nixEnvSelector.nixShellConfig";
-export const SELECTED_ATTR_CONFIG_KEY = "nixEnvSelector.nixShellConfigAttr";
+export const enum ConfigPath {
+  SELECTED_ENV_CONFIG_KEY = "nixEnvSelector.nixShellConfig",
+  SELECTED_ATTR_CONFIG_KEY = "nixEnvSelector.nixShellConfigAttr",
+}

@@ -2,7 +2,8 @@ import * as vscode from "vscode";
 import * as Action from "./actions";
 import { ap } from "fp-ts/lib/Array";
 import { flow } from "fp-ts/lib/function";
-import { Command, Label, SELECTED_ENV_CONFIG_KEY, SELECTED_ATTR_CONFIG_KEY } from "./constants";
+import { pipe } from "fp-ts/lib/pipeable";
+import { Command, Label, ConfigPath } from "./constants";
 import {
   flatten,
   fromNullable,
@@ -28,8 +29,8 @@ const selectEnvCommandHandler = (
   workspaceRoot: string,
   config: vscode.WorkspaceConfiguration
 ) => () => {
-    const nixAttrConfig = fromNullable(
-      config.get<string>(SELECTED_ATTR_CONFIG_KEY)
+    const nixAttr = fromNullable(
+      config.get<string>(ConfigPath.SELECTED_ATTR_CONFIG_KEY)
     );
 
     Action.getNixConfigList(workspaceRoot)
@@ -44,12 +45,12 @@ const selectEnvCommandHandler = (
                 1,
                 apNixConfigPath([
                   Action.updateEditorConfig(
-                    SELECTED_ENV_CONFIG_KEY,
+                    ConfigPath.SELECTED_ENV_CONFIG_KEY,
                     config,
                     workspaceRoot
                   ),
                   flow(
-                    Action.applyEnvByNixConfPath(getShellCmd("env", nixAttrConfig)),
+                    Action.applyEnvByNixConfPath(getShellCmd("env", nixAttr)),
                     map(showStatus(Label.SELECTED_ENV_NEED_RELOAD, none))
                   ),
                   Action.askReload
@@ -81,11 +82,11 @@ export function activate(context: vscode.ExtensionContext) {
 
   const config = vscode.workspace.getConfiguration();
   const maybeNixEnvConfig = fromNullable(
-    config.get<string>(SELECTED_ENV_CONFIG_KEY)
+    config.get<string>(ConfigPath.SELECTED_ENV_CONFIG_KEY)
   );
 
   const maybeNixAttrConfig = fromNullable(
-    config.get<string>(SELECTED_ATTR_CONFIG_KEY)
+    config.get<string>(ConfigPath.SELECTED_ATTR_CONFIG_KEY)
   );
 
   const activateOrShowDialogWithConfig = Action.activateOrShowDialog(
